@@ -6,6 +6,8 @@ app.set('view engine', 'hbs')
 .use((req, res, next) => {
   res._render = res.render
   res.render = function (file, options) {
+    if (!options) options = {}
+    file = file.replace('.hbs','')
     res._render('../template.hbs', Object.assign(options, {
       partial: () => file
     }))
@@ -14,3 +16,4 @@ app.set('view engine', 'hbs')
 })
 
 hbs.registerPartials(path.join(__dirname + '/../views/'))
+hbs.registerPartials(path.join(__dirname + './../views/partials'))

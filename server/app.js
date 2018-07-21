@@ -15,8 +15,6 @@ const httpPort = 3001
 // App Initialization
 var app = express()
 .set('views', path.join(__dirname + '/views'))
-.use(express.json())
-.use(express.urlencoded({extended: true}))
 .use(express.static(public))
 
 Object.assign(app.locals, {
@@ -28,6 +26,9 @@ Object.assign(app.locals, {
 
 var httpServer = http.createServer(app)
 module.exports = {app, httpServer}
+// --
+
+// Databases
 // --
 
 // Middleware
@@ -56,12 +57,12 @@ app.route('/test')
 // --
 
 // Default Routes
-app.all('*', (req, res) => {
-  res.redirect('/not-found')
-})
-
 app.get('/not-found', (req, res) => {
   res.send('Resource not found.')
+})
+
+app.all('*', (req, res) => {
+  res.redirect('/not-found')
 })
 // --
 

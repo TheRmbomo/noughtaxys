@@ -171,11 +171,23 @@ function updateBoard() {
   var {game} = main
   main.info.then(info => {
     for (let boardI = 0; boardI < 9; boardI++) {
-      let board = {c: game.boards[boardI], s: info.game[boardI]}
+      let board = {c: game.pieces[0][boardI], s: info.game[boardI]}
+      ,pieces = info.pieces.length
+      if (board.c.won) continue
       for (let pieceI = 0; pieceI < 9; pieceI++) {
-        let piece = board.s[pieceI]
-        if (piece === 1) board.c.children[1+pieceI*3].visible = true
-        else if (piece === 2) board.c.children[2+pieceI*3].visible = true
+        let piece = board.s.board[pieceI]
+        if (piece >= pieces) continue
+        board.c.children[piece+pieceI*pieces].visible = true
+      }
+      if (board.s.winner && board.s.winner < pieces) {
+        main.objects.splice(main.objects.indexOf(board.c.children[0]),9)
+        game.pieces[board.s.winner][boardI].visible = true
+        for (let winI = 0; winI < board.s.win.length; winI++) {
+          let cellI = board.s.win[winI], cellMat = board.c.children[cellI*pieces].material
+          cellMat.color = [1,0,0]
+          cellMat.transparency = false
+          cellMat.opacity = 1
+        }
       }
     }
   })
@@ -183,116 +195,75 @@ function updateBoard() {
 
 function boardInit() {
   var {scene, camera, gltfLoader} = main, unit = 100*1.05
-  ,boardPos = [
+  ,boardPos = main.boardPosition = [
     [-unit,-unit], [0,-unit], [unit,-unit],
     [-unit,    0], [0,    0], [unit,    0],
     [-unit, unit], [0, unit], [unit, unit]
   ]
   ,loadMesh = file => new Promise((resolve, reject) => {
-    gltfLoader.load(file, obj => resolve(obj.scene.children[0]), null, null, null, true)
+    gltfLoader.load(file, obj => resolve(obj.scene.children[0]), null, reject)
   })
   ,sidelength = 320
   ,game = main.game = createBox({s: [sidelength, 20, sidelength], color: 0xdddddd})
   game.name = 'main_board'
+  game.pieces = []
   game.sidelength = sidelength
-  game.boards = []
-  game.circles = []
-  game.crosses = []
   scene.add(game)
 
-  Promise.all([
-    loadMesh('lines.gltf'), loadMesh('cross.gltf'), loadMesh('circle.gltf')
-  ])
-  .then(data => {
-    var [board, cross, circle] = data, cell = createSquare({
-      s: [100,100], opacity: 0, t: [0,20,0]
-    })
-    board.name = 'board'
-    cross.name = 'cross'
-    circle.name = 'circle'
-    cell.name = 'cell'
-
-    board.scale.x = board.scale.z = 1/3 - 1/30
-    cross.visible = circle.visible = false
-
-    for (let pieceI = 0; pieceI < 9; pieceI++) {
-      cell.position.set(boardPos[pieceI][0],1,boardPos[pieceI][1])
-      cross.position.set(boardPos[pieceI][0],0,boardPos[pieceI][1])
-      circle.position.set(boardPos[pieceI][0],0,boardPos[pieceI][1])
-      main.objects.push(cell)
-      board.add(cell, cross, circle)
-      cell = cell.clone()
-      cross = cross.clone()
-      circle = circle.clone()
-    }
-
-    for (let boardI = 0; boardI < 9; boardI++) {
-      cross.position.set(boardPos[boardI][0],10,boardPos[boardI][1])
-      circle.position.set(boardPos[boardI][0],10,boardPos[boardI][1])
-      game.crosses.push(cross)
-      game.circles.push(circle)
-      game.add(cross, circle)
-      cross = cross.clone()
-      circle = circle.clone()
-
-      board.index = boardI
-      game.boards.push(board)
-      board.position.set(boardPos[boardI][0],10,boardPos[boardI][1])
-      game.add(board)
-      for (let pieceI = 0; pieceI < board.children.length; pieceI += 3) {
-        let cell = board.children[pieceI]
-        main.objects.push(cell)
-        cell.material = cell.material.clone()
+  main.info.then(info => {
+    info.pieces[0] = 'board'
+    var models = info.pieces.map(name => loadMesh(name + '.gltf').catch(e => null))
+    Promise.all(models).then(data => {
+      for (let pieceI = 0; pieceI < data.length; pieceI++) {
+        data[pieceI].name = info.pieces[pieceI]
+        game.pieces.push([null,null,null,null,null,null,null,null,null])
       }
-      board = board.clone()
-    }
 
-    updateBoard()
+      var [board] = data, cell = createSquare({s: [100,100], opacity: 0, t: [0,20,0]})
+      data[0] = null
+      main.models = data
+      cell.name = 'cell'
 
-    /*
-    for (var boardI = 0; boardI < 9; boardI++) {
-      game.boards.push(lines)
-      lines.scale.x = lines.scale.z = 1/3 - 1/30
-      lines.position.set(boardPos[boardI][0],10,boardPos[boardI][1])
-      game.add(lines)
-      lines = lines.clone()
+      board.scale.x = board.scale.z = 3/10
+      for (var pieceI = 1; pieceI < data.length; pieceI++) {
+        data[pieceI].visible = false
+      }
 
-      cross.visible = circle.visible = false
-      cross.position.set(boardPos[boardI][0],10,boardPos[boardI][1])
-      circle.position.set(boardPos[boardI][0],10,boardPos[boardI][1])
-      game.crosses.push(cross)
-      game.circles.push(circle)
-      game.add(cross, circle)
-      cross = cross.clone()
-      circle = circle.clone()
-
-      let board = {c: game.boards[boardI], s: info.game[boardI]}
-      board.c.index = boardI
-      board.c.cells = []
-      board.c.crosses = []
-      board.c.circles = []
-      for (let pieceI = 0; pieceI < 9; pieceI++) {
-        cell.position.set(boardPos[pieceI][0],1,boardPos[pieceI][1])
-        cross.position.set(boardPos[pieceI][0],0,boardPos[pieceI][1])
-        circle.position.set(boardPos[pieceI][0],0,boardPos[pieceI][1])
-        cell.name = 'cell'
-        board.c.cells.push(cell)
-        board.c.crosses.push(cross)
-        board.c.circles.push(circle)
+      for (let spotI = 0; spotI < 9; spotI++) {
+        cell.position.set(boardPos[spotI][0],0.1,boardPos[spotI][1])
         main.objects.push(cell)
-        board.c.add(cell, cross, circle)
+        board.add(cell)
         cell = cell.clone()
-        cell.material = cell.material.clone()
-        if (board.s[pieceI] === 1) cross.visible = true
-        else if (board.s[pieceI] === 2) circle.visible = true
-        cross = cross.clone()
-        circle = circle.clone()
-        cross.material.color.b = 1
-        cross.material.needsUpdate = true
-        cross.visible = circle.visible = false
+        for (var pieceI = 1; pieceI < data.length; pieceI++) {
+          data[pieceI].position.set(boardPos[spotI][0],0.5,boardPos[spotI][1])
+          board.add(data[pieceI])
+          data[pieceI] = data[pieceI].clone()
+        }
       }
-    }
-    */
+
+      for (let boardI = 0; boardI < 9; boardI++) {
+        board.index = boardI
+        board.position.set(boardPos[boardI][0],10,boardPos[boardI][1])
+        game.pieces[0][boardI] = board
+        game.add(board)
+
+        for (var pieceI = 1; pieceI < data.length; pieceI++) {
+          data[pieceI].position.set(boardPos[boardI][0],10,boardPos[boardI][1])
+          game.pieces[pieceI][boardI] = data[pieceI]
+          game.add(data[pieceI])
+          data[pieceI] = data[pieceI].clone()
+        }
+
+        for (let cellI = 0; cellI < board.children.length; cellI += data.length) {
+          let cell = board.children[cellI]
+          main.objects.push(cell)
+          cell.material = cell.material.clone()
+        }
+        board = board.clone()
+      }
+
+      updateBoard()
+    })
   })
 
   camera.position.setY(500)
@@ -362,8 +333,6 @@ function eventsInit() {
     if (main.targetCell) {
       let target = main.targetCell, parent = target.parent
       ,index = target.parent.children.indexOf(target)
-      // parent.children[index+1].visible = !parent.children[index+1].visible
-      // parent.children[index+2].visible = !parent.children[index+2].visible
     }
   }
 

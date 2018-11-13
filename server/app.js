@@ -36,24 +36,8 @@ require('./middleware/handlebars')
 // --
 
 // Routes
+require('./websockets')
 require('./routes/web-routes')
-// --
-
-// Written Example
-app.route('/test')
-.get((req, res) => {
-  res.write(`<h1>Send a Message</h1>`)
-  res.write(`<form action="/test" method="post">`)
-  res.write(`<p>Test</p>`)
-  res.write(`<input type="text" name="message">`)
-  res.write(`<input type="submit" value="Send">`)
-  res.write(`</form>`)
-  res.end()
-})
-.post((req, res) => {
-  console.log(req.body)
-  res.send(req.body.message)
-})
 // --
 
 // Default Routes

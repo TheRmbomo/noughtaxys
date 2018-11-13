@@ -1,12 +1,73 @@
+* {
+  box-sizing: border-box;
+}
+
 html {
-  height: 100%;
 }
 
 body {
-  min-height: 100%;
-  position: relative;
+  background-color: #000;
 }
 
 html, body {
-  margin: unset;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  position: fixed;
+}
+
+canvas {
+  overflow: hidden;
+}
+
+table {
+  width: 100%;
+  text-align: center;
+}
+
+table tr:first-child {
+  font-weight: 700;
+}
+
+hr {
+  width: 80%; height: 3px; border: 0;
+  background-color: #000;
+}
+
+button {
+  margin: 5px;
+  font-size: unset;
+  background: #EEE;
+  border: unset;
+  border-radius: 5px;
+}
+
+.noselect {
+  -webkit-user-select: none; /* webkit (safari, chrome) browsers */
+  -moz-user-select: none; /* mozilla browsers */
+  -khtml-user-select: none; /* webkit (konqueror) browsers */
+  -ms-user-select: none; /* IE10+ */
+}
+
+.hud {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: #FFF;
+  font-family: Verdana, Arial, sans-serif;
+  text-align: center;
+  -webkit-overflow-scrolling: touch;
+}
+
+.hudlabel {
+  padding-top: 0.5em;
+  font-size: 25px;
+  font-variant: small-caps;
+}
+
+.scrollContent {
+  overflow: auto;
+  max-height: fit-content;
+  max-height: -moz-fit-content;
 }

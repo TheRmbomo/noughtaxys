@@ -1,0 +1,167 @@
+{
+  "accessors": [
+    {
+      "name": "cross3_1_0_positions",
+      "componentType": 5126,
+      "count": 80,
+      "min": [
+        -45.96194076538086,
+        -0.5,
+        -45.96194076538086
+      ],
+      "max": [
+        45.96194076538086,
+        0.5,
+        45.96194076538086
+      ],
+      "type": "VEC3",
+      "bufferView": 0,
+      "byteOffset": 0
+    },
+    {
+      "name": "cross3_1_0_normals",
+      "componentType": 5126,
+      "count": 80,
+      "min": [
+        -1,
+        -1,
+        -1
+      ],
+      "max": [
+        1,
+        1,
+        1
+      ],
+      "type": "VEC3",
+      "bufferView": 1,
+      "byteOffset": 0
+    },
+    {
+      "name": "cross3_1_0_texcoords",
+      "componentType": 5126,
+      "count": 80,
+      "min": [
+        0.125,
+        0
+      ],
+      "max": [
+        0.875,
+        1
+      ],
+      "type": "VEC2",
+      "bufferView": 2,
+      "byteOffset": 0
+    },
+    {
+      "name": "cross3_1_0_indices",
+      "componentType": 5123,
+      "count": 132,
+      "min": [
+        0
+      ],
+      "max": [
+        79
+      ],
+      "type": "SCALAR",
+      "bufferView": 3,
+      "byteOffset": 0
+    }
+  ],
+  "asset": {
+    "generator": "obj2gltf",
+    "version": "2.0"
+  },
+  "buffers": [
+    {
+      "name": "cross",
+      "byteLength": 2824,
+      "uri": "data:application/octet-stream;base64,pLQpQgAAAL8H2TdCB9k3QgAAAL+ktClCB9k3QgAAAD+ktClCpLQpQgAAAD8H2TdCpLQpQgAAAD8H2TdCB9k3QgAAAD+ktClCMEZiQAAAAD8AAACAAAAAAAAAAD8wRmJAB9k3wgAAAD+ktCnCpLQpwgAAAD8H2TfCpLQpwgAAAL8H2TfCB9k3wgAAAL+ktCnCB9k3wgAAAL+ktCnCpLQpwgAAAL8H2TfCAAAAgAAAAL8wRmLAMEZiwAAAAL8AAAAAB9k3QgAAAL+ktClCMEZiQAAAAL8AAACAMEZiQAAAAD8AAACAB9k3QgAAAD+ktClCB9k3wgAAAL+ktCnCMEZiwAAAAL8AAAAAMEZiwAAAAD8AAAAAB9k3wgAAAD+ktCnCpLQpwgAAAL8H2TdCAAAAAAAAAL8wRmJAAAAAAAAAAD8wRmJApLQpwgAAAD8H2TdCpLQpwgAAAD8H2TdCAAAAAAAAAD8wRmJAMEZiwAAAAD8AAAAAB9k3wgAAAD+ktClCB9k3wgAAAD+ktClCMEZiwAAAAD8AAAAAMEZiwAAAAL8AAAAAB9k3wgAAAL+ktClCB9k3wgAAAL+ktClCMEZiwAAAAL8AAAAAAAAAAAAAAL8wRmJApLQpwgAAAL8H2TdCB9k3QgAAAL+ktCnCpLQpQgAAAL8H2TfCpLQpQgAAAD8H2TfCB9k3QgAAAD+ktCnCB9k3wgAAAL+ktClCpLQpwgAAAL8H2TdCpLQpwgAAAD8H2TdCB9k3wgAAAD+ktClCMEZiQAAAAD8AAACAMEZiQAAAAL8AAACAB9k3QgAAAL+ktCnCB9k3QgAAAD+ktCnCAAAAgAAAAD8wRmLAMEZiQAAAAD8AAACAB9k3QgAAAD+ktCnCpLQpQgAAAD8H2TfCAAAAgAAAAL8wRmLAAAAAgAAAAD8wRmLApLQpQgAAAD8H2TfCpLQpQgAAAL8H2TfCMEZiQAAAAL8AAACAAAAAgAAAAL8wRmLApLQpQgAAAL8H2TfCB9k3QgAAAL+ktCnCAAAAgAAAAD8wRmLAMEZiwAAAAD8AAAAAAAAAAAAAAL8wRmJAMEZiQAAAAL8AAACAB9k3QgAAAL+ktClCpLQpQgAAAL8H2TdCAAAAAAAAAD8wRmJAAAAAAAAAAL8wRmJApLQpQgAAAL8H2TdCpLQpQgAAAD8H2TdCpLQpwgAAAD8H2TfCB9k3wgAAAD+ktCnCAAAAgAAAAD8wRmLAAAAAgAAAAL8wRmLApLQpwgAAAL8H2TfCpLQpwgAAAD8H2TfC8wQ1PwAAAADzBDU/8wQ1PwAAAADzBDU/8wQ1PwAAAADzBDU/8wQ1PwAAAADzBDU/AAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAA8wQ1vwAAAADzBDW/8wQ1vwAAAADzBDW/8wQ1vwAAAADzBDW/8wQ1vwAAAADzBDW/AAAAAAAAgL8AAAAAAAAAAAAAgL8AAAAAAAAAAAAAgL8AAAAAAAAAAAAAgL8AAAAA8wQ1PwAAAADzBDW/AACAPwAAAAAAAAAAAACAPwAAAAAAAAAA8wQ1PwAAAADzBDW/8wQ1vwAAAADzBDU/AACAvwAAAAAAAAAAAACAvwAAAAAAAAAA8wQ1vwAAAADzBDU/8wQ1PwAAAADzBDU/AAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/8wQ1PwAAAADzBDU/AAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAA8wQ1vwAAAADzBDW/AACAvwAAAAAAAAAAAACAvwAAAAAAAAAA8wQ1vwAAAADzBDW/AAAAAAAAgL8AAAAAAAAAAAAAgL8AAAAAAAAAAAAAgL8AAAAAAAAAAAAAgL8AAAAA8wQ1PwAAAADzBDW/8wQ1PwAAAADzBDW/8wQ1PwAAAADzBDW/8wQ1PwAAAADzBDW/8wQ1vwAAAADzBDU/8wQ1vwAAAADzBDU/8wQ1vwAAAADzBDU/8wQ1vwAAAADzBDU/AACAPwAAAAAAAAAAAACAPwAAAAAAAAAA8wQ1PwAAAADzBDU/8wQ1PwAAAADzBDU/AAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAIC/AAAAAAAAAAAAAIC/8wQ1vwAAAADzBDW/8wQ1vwAAAADzBDW/AAAAAAAAgL8AAAAAAAAAAAAAgL8AAAAAAAAAAAAAgL8AAAAAAAAAAAAAgL8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgL8AAAAAAAAAAAAAgL8AAAAAAAAAAAAAgL8AAAAAAAAAAAAAgL8AAAAAAAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/8wQ1vwAAAADzBDU/8wQ1vwAAAADzBDU/AAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAIC/AAAAAAAAAAAAAIC/8wQ1PwAAAADzBDW/8wQ1PwAAAADzBDW/AADAPgAAgD8AACA/AACAPwAAID8AAEA/AADAPgAAQD8AAMA+AABAPwAAID8AAEA/AAAgP1hXJT8AAMA+sYglPwAAwD4AAAA/AAAgPwAAAD8AACA/AACAPgAAwD4AAIA+AADAPgAAgD4AACA/AACAPgAAID9pUQ8+AADAPu0NDj4AACA/AACAP/0QOz8AAIA/qKg6PwAAQD8AACA/AABAPwAAAD4AAIA/E/JxPgAAgD/C23M+AABAPwAAAD4AAEA/AADAPgAAgD/AW/g+AACAPxdj+D4AAEA/AADAPgAAQD8AAMA+AABAPxdj+D4AAEA/Mq74PgAAAD8AAMA+AAAAPwAAwD4AAAA/Mq74PgAAAD+5pvg+AACAPgAAwD4AAIA+AADAPgAAgD65pvg+AACAPsBb+D4AAAAAAADAPgAAAAAAACA/AACAPwAAYD8AAIA/AABgPwAAQD8AACA/AABAPwAAAD4AAIA/AADAPgAAgD8AAMA+AABAPwAAAD4AAEA/DksDPwAAQD99WAM/AACAPwAAID8AAIA/AAAgPwAAQD9RZgM/AAAAPw5LAz8AAEA/AAAgPwAAQD8AACA/AAAAP7BzAz8AAIA+UWYDPwAAAD8AACA/AAAAPwAAID8AAIA+fVgDPwAAAACwcwM/AACAPgAAID8AAIA+AAAgPwAAAAAAACA/EaYcPwAAwD7x9hw/AADAPiL91j0AACA/7IfYPQAAID8AAAAAAADAPgAAAABiEYs+AABAP7hAij4AAIA/AADAPgAAgD8AAMA+AABAPwAAID8AAAA/AADAPgAAAD/vWUM/AABAP1rUQz8AAIA/AABgPwAAgD8AAGA/AABAPwIAAwAAAAAAAQACAAUABwAEAAcABQAGAAkACwAIAAsACQAKAA4ADwAMAAwADQAOABIAEwAQABAAEQASABUAFwAUABcAFQAWABoAGwAYABgAGQAaAB0AHwAcAB8AHQAeACEAIwAgACMAIQAiACYAJwAkACQAJQAmACoAKwAoACgAKQAqAC0ALwAsAC8ALQAuADIAMwAwADAAMQAyADUANwA0ADcANQA2ADkAOwA4ADsAOQA6AD4APwA8ADwAPQA+AAYAQQAHAEEABgBAAEQARQBCAEIAQwBEAEcASQBGAEkARwBIAEMAQgAPAA8ADgBDAEAASwBBAEsAQABKAE4ATwBMAEwATQBOAA=="
+    }
+  ],
+  "bufferViews": [
+    {
+      "name": "bufferView_0",
+      "buffer": 0,
+      "byteLength": 960,
+      "byteOffset": 0,
+      "byteStride": 12,
+      "target": 34962
+    },
+    {
+      "name": "bufferView_1",
+      "buffer": 0,
+      "byteLength": 960,
+      "byteOffset": 960,
+      "byteStride": 12,
+      "target": 34962
+    },
+    {
+      "name": "bufferView_2",
+      "buffer": 0,
+      "byteLength": 640,
+      "byteOffset": 1920,
+      "byteStride": 8,
+      "target": 34962
+    },
+    {
+      "name": "bufferView_3",
+      "buffer": 0,
+      "byteLength": 264,
+      "byteOffset": 2560,
+      "target": 34963
+    }
+  ],
+  "materials": [
+    {
+      "name": "initialShadingGroup",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.5,
+          0.5,
+          0.5,
+          1
+        ],
+        "metallicFactor": 0,
+        "roughnessFactor": 1
+      },
+      "emissiveFactor": [
+        0,
+        0,
+        0
+      ],
+      "alphaMode": "OPAQUE",
+      "doubleSided": false
+    }
+  ],
+  "meshes": [
+    {
+      "name": "cross3_1",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "NORMAL": 1,
+            "TEXCOORD_0": 2
+          },
+          "indices": 3,
+          "material": 0,
+          "mode": 4
+        }
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "name": "cross3",
+      "mesh": 0
+    }
+  ],
+  "scene": 0,
+  "scenes": [
+    {
+      "nodes": [
+        0
+      ]
+    }
+  ]
+}

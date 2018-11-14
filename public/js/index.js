@@ -2,6 +2,11 @@ let main = {
   mouseRaycaster: new THREE.Raycaster(), boardRaycaster: new THREE.Raycaster()
   ,gltfLoader: new THREE.GLTFLoader()
   ,objects: []
+  ,boardPosition: (unit => [
+    [-unit,-unit], [0,-unit], [unit,-unit],
+    [-unit,    0], [0,    0], [unit,    0],
+    [-unit, unit], [0, unit], [unit, unit]
+  ])(100*1.05)
   ,sizing: {
     resize: function() {
       main.sizing.array.map(e => {
@@ -171,35 +176,42 @@ function updateBoard() {
   var {game} = main
   main.info.then(info => {
     for (let boardI = 0; boardI < 9; boardI++) {
-      let board = {c: game.pieces[0][boardI], s: info.game[boardI]}
-      ,pieces = info.pieces.length
+      let board = {c:game.pieces[0][boardI], s:info.game[boardI]}, pieces = info.pieces.length
       if (board.c.won) continue
-      for (let pieceI = 0; pieceI < 9; pieceI++) {
-        let piece = board.s.board[pieceI]
-        if (piece >= pieces) continue
-        board.c.children[piece+pieceI*pieces].visible = true
-      }
+
       if (board.s.winner && board.s.winner < pieces) {
-        main.objects.splice(main.objects.indexOf(board.c.children[0]),9)
-        game.pieces[board.s.winner][boardI].visible = true
+        let cellI = main.objects.indexOf(board.c.children[0])
+        if (cellI !== -1) main.objects.splice(cellI,9)
+        let model = main.models[board.s.winner].clone()
+        model.position.set(...(x => [x[0],10,x[1]])(main.boardPosition[boardI]))
+        model.visible = true
+        game.pieces[board.s.winner][boardI] = model
+        game.add(model)
         for (let winI = 0; winI < board.s.win.length; winI++) {
-          let cellI = board.s.win[winI], cellMat = board.c.children[cellI*pieces].material
+          let cellI = board.s.win[winI], cellMat = board.c.cells[cellI].material
           cellMat.color = [1,0,0]
           cellMat.transparency = false
           cellMat.opacity = 1
         }
+      }
+
+      for (let pieceI = 0; pieceI < 9; pieceI++) {
+        let piece = board.s.board[pieceI]
+        if (!piece || piece >= pieces) continue
+        let cellI = main.objects.indexOf(board.c.children[pieceI])
+        if (cellI !== -1) main.objects.splice(cellI,1)
+        let model = main.models[piece].clone()
+        model.position.set(...(x => [x[0],0.5,x[1]])(main.boardPosition[pieceI]))
+        model.visible = true
+        board.c.pieces[piece][pieceI] = model
+        board.c.add(model)
       }
     }
   })
 }
 
 function boardInit() {
-  var {scene, camera, gltfLoader} = main, unit = 100*1.05
-  ,boardPos = main.boardPosition = [
-    [-unit,-unit], [0,-unit], [unit,-unit],
-    [-unit,    0], [0,    0], [unit,    0],
-    [-unit, unit], [0, unit], [unit, unit]
-  ]
+  var {scene, camera, gltfLoader} = main, boardPos = main.boardPosition
   ,loadMesh = file => new Promise((resolve, reject) => {
     gltfLoader.load(file, obj => resolve(obj.scene.children[0]), null, reject)
   })
@@ -225,40 +237,32 @@ function boardInit() {
       cell.name = 'cell'
 
       board.scale.x = board.scale.z = 3/10
-      for (var pieceI = 1; pieceI < data.length; pieceI++) {
-        data[pieceI].visible = false
-      }
 
       for (let spotI = 0; spotI < 9; spotI++) {
         cell.position.set(boardPos[spotI][0],0.1,boardPos[spotI][1])
         main.objects.push(cell)
         board.add(cell)
         cell = cell.clone()
-        for (var pieceI = 1; pieceI < data.length; pieceI++) {
-          data[pieceI].position.set(boardPos[spotI][0],0.5,boardPos[spotI][1])
-          board.add(data[pieceI])
-          data[pieceI] = data[pieceI].clone()
-        }
       }
 
       for (let boardI = 0; boardI < 9; boardI++) {
         board.index = boardI
+        board.pieces = [null]
         board.position.set(boardPos[boardI][0],10,boardPos[boardI][1])
         game.pieces[0][boardI] = board
         game.add(board)
 
-        for (var pieceI = 1; pieceI < data.length; pieceI++) {
-          data[pieceI].position.set(boardPos[boardI][0],10,boardPos[boardI][1])
-          game.pieces[pieceI][boardI] = data[pieceI]
-          game.add(data[pieceI])
-          data[pieceI] = data[pieceI].clone()
+        for (let pieceI = 1; pieceI < data.length; pieceI++) {
+          board.pieces.push([null,null,null,null,null,null,null,null,null])
         }
 
-        for (let cellI = 0; cellI < board.children.length; cellI += data.length) {
-          let cell = board.children[cellI]
+        board.cells = board.children.slice()
+        for (let cellI = 0; cellI < 9; cellI++) {
+          let cell = board.cells[cellI]
           main.objects.push(cell)
           cell.material = cell.material.clone()
         }
+
         board = board.clone()
       }
 

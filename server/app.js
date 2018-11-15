@@ -1,4 +1,5 @@
 // Environment Variables
+require('./config/config')
 // --
 
 // External Libraries
@@ -29,6 +30,7 @@ module.exports = {app, httpServer}
 // --
 
 // Databases
+require('./db/mongoose')
 // --
 
 // Middleware

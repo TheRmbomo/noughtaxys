@@ -10,6 +10,9 @@ ws.on('ready', (socket, httpReq) => {
   })
 
   socket.on('init', (req, send) => {
+    if (!socket.session) {
+      return send({session: false})
+    }
     send({
       ended: false
       ,game: [
@@ -35,5 +38,9 @@ ws.on('ready', (socket, httpReq) => {
       ,games: 2, draws: 1
       ,currentPlayer: 1, currentBoard: -1, winner: null, win: null
     })
+  })
+
+  socket.on('move', (req, send) => {
+
   })
 })

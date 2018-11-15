@@ -1,6 +1,8 @@
 const WebSocket = require('ws')
 const cookie = require('cookie')
+
 const {httpServer} = require('./app')
+const {redisClient} = require('./middleware/session')
 
 var ws = new WebSocket.Server({server: httpServer})
 
@@ -46,8 +48,7 @@ ws.on('connection', (socket, req) => {
       socket.events[req.event](req.data, callback)
       socket.session.save().catch(e => e)
     }, e => e)
-
-    promise.catch(e => e)
+    .catch(e => e)
   })
 
   socket.on = function (event, callback) {
@@ -56,7 +57,33 @@ ws.on('connection', (socket, req) => {
     socket.events[event] = callback
   }
 
+  try {
+    socket.cookies = cookie.parse(req.headers.cookie)
+    socket.sessionID = socket.cookies[process.env.COOKIE_NAME + '.sid'].slice(2).split('.')[0]
+  } catch (e) {}
+  socket.session = null
+
   var promise = Promise.resolve()
+  if (socket.sessionID) {
+    promise = promise.then(() => {
+      return new Promise((resolve, reject) => {
+        redisClient.get(socket.sessionID, (err, session) => {
+          if (err) return reject(err)
+          if (session) resolve(session)
+          else reject('No session')
+        })
+      })
+      .then(session => {
+        session.save = () => new Promise((resolve, reject) => {
+          redisClient.set(socket.sessionID, session, err => {
+            if (err) reject(err)
+            resolve()
+          })
+        })
+        socket.session = session
+      })
+    })
+  }
   promise.then(() => ws.emit('ready', socket, req)).catch(console.log)
 })
 

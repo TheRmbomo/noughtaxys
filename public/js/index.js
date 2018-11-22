@@ -17,6 +17,7 @@ let main = {
     }
     ,array: []
   }
+  ,infoStack: []
 }
 
 window.addEventListener('scroll', event => {
@@ -119,7 +120,6 @@ function createBox(opt) {
 function updateBoard() {
   var {game} = main
   main.info.then(info => {
-    if (!info) return
     for (let boardI = 0; boardI < 9; boardI++) {
       let board = {c:game.pieces[0][boardI], s:info.game[boardI]}, pieces = info.pieces.length
       if (board.c.won) continue
@@ -156,7 +156,7 @@ function updateBoard() {
         board.c.add(model)
       }
     }
-  })
+  }, e => null)
 }
 
 function toScreenPosition(vector, camera) {
@@ -197,15 +197,19 @@ function toScreenPosition(vector, camera) {
   }
 
   main.info = new Promise((resolve, reject) => ws.emit('init', null, res => {
-    if ('error' in res) reject(res)
+    console.log(0, res)
+    if ('error' in res) return reject(res)
     if ('session' in res) {
       main.game.material.color = [0.2,0.2,0.2]
-      let w = 250, h = 200, modal = {
+      let w = 250, h = 150, modal = {
         body: document.createElement('div')
-        ,form: {
-          message: createText('div', 'Enter a name, or watch the game as a guest.')
-          ,name: document.createElement('input')
-        }
+        ,form: document.createElement('form')
+        ,sizing: {set size(v) {
+          modal.body.style.width = w + 'px'
+          modal.body.style.height = h + 'px'
+          modal.body.style.left = (v.x-w)/2 + 'px'
+          if (modal.body.open) modal.body.style.top = (v.y-h)/2 + 'px'
+        }}
       }
       modal.body.style.top = -h + 'px'
       modal.body.style.backgroundColor = '#445'
@@ -213,27 +217,104 @@ function toScreenPosition(vector, camera) {
       modal.body.classList.add('hud')
       modal.body.open = false
 
-      modal.form.message.classList.add('hudtext')
-      modal.form.message.style.paddingTop = '1em'
-      modal.form.message.style.paddingBottom = '1em'
-      modal.form.message.style.color = '#BBB'
-      modal.form.name.type = 'text'
+      main.sizing.push(modal.sizing)
 
-      modal.body.appendChild(modal.form.message)
-      modal.body.appendChild(modal.form.name)
+      ;(() => {
+        var {form} = modal
+        form.style.paddingTop = form.style.paddingBottom = '0.5em'
+        form.style.overflow = 'hidden'
+        Object.assign(form, {
+          message: createText('div', 'Enter a name')
+          ,table: document.createElement('table')
+          ,name_box: document.createElement('input')
+          ,submit: document.createElement('input')
+        })
+        var {table} = form
 
-      main.sizing.push({set size(v) {
-        modal.body.style.width = w + 'px'
-        modal.body.style.height = h + 'px'
-        modal.body.style.left = (v.x-w)/2 + 'px'
-        if (modal.body.open) modal.body.style.top = (v.y-h)/2 + 'px'
-      }})
+        form.message.classList.add('hudtext')
+        form.message.style.paddingBottom = '1em'
+        form.name_box.type = 'text'
+
+        table.style.tableLayout = 'fixed'
+        table.row = document.createElement('tr')
+
+        var {row} = table
+        row.name_label = createText('td', 'Name:')
+        row.name_label.style.width = '4em'
+        row.name_label.style.textAlign = 'right'
+        row.name_label.classList.add('hudtext')
+        row.name_input = document.createElement('td')
+        row.name_input.appendChild(form.name_box)
+        form.name_box.style.width = '90%'
+
+        row.appendChild(row.name_label)
+        row.appendChild(row.name_input)
+        table.appendChild(row)
+
+        form.submit.value = 'Enter'
+        form.submit.type = 'submit'
+        form.submit.style.marginTop = form.submit.style.marginRight = '1em'
+        form.submit.style.float = 'right'
+
+        form.addEventListener('submit', event => {
+          event.preventDefault()
+          function badEnter() {console.log('badenter')}
+          if (!form.name_box.value) return badEnter()
+          form.submit.disabled = true
+          var req = new XMLHttpRequest()
+          req.onreadystatechange = function() {
+            if (this.readyState === 4) {
+              form.submit.disabled = false
+              ws.close() // automatically reconnects
+              ws.emit('session', {name: form.name_box.value}, res => {
+                main.info = new Promise((resolve, reject) => ws.emit('init', null, res => {
+                  console.log(res)
+                  if ('error' in res) return reject(res)
+                  if ('session' in res) {
+                    form.submit.disabled = false
+                    return reject()
+                  }
+                  main.game.material.color = [0xdd/255,0xdd/255,0xdd/255]
+                  main.sizing.remove(modal.sizing)
+                  main.hud.body.removeChild(modal.body)
+                  main.infoStack.map(act => {main.info.then(act, e => e)})
+                  resolve(res)
+                }))
+                main.info.catch(e => null)
+              })
+            }
+          }
+          req.open('GET', `/session`, true)
+          req.send()
+        })
+        form.appendChild(form.message)
+        form.appendChild(table)
+        form.appendChild(form.submit)
+        modal.body.appendChild(form)
+      })()
+
+      var guestOption = createText('button', 'Or start watching as a guest')
+      guestOption.classList.add('hudtext')
+      guestOption.style.color = '#66A'
+      guestOption.style.backgroundColor = '#0000'
+      guestOption.addEventListener('mouseover', event => {
+        guestOption.style.color = '#88A'
+      })
+      guestOption.addEventListener('mouseout', event => {
+        guestOption.style.color = '#66A'
+      })
+      guestOption.addEventListener('mousedown', event => {
+        guestOption.style.color = '#224'
+      })
+      guestOption.addEventListener('mouseup', event => {
+        guestOption.style.color = '#88A'
+      })
+      modal.body.appendChild(guestOption)
+
       animate(time => {
         var pos = parseFloat(modal.body.style.top) + 10, end = (window.innerHeight-h)/2
         modal.body.style.top = pos + 'px'
-        if (pos < end) {
-          return true
-        }
+        if (pos < end) return true
         else {
           modal.body.style.top = end + 'px'
           modal.body.open = true
@@ -241,7 +322,7 @@ function toScreenPosition(vector, camera) {
       })
 
       main.hud.body.appendChild(modal.body)
-      return resolve()
+      return reject()
     }
     resolve(res)
   }))
@@ -258,11 +339,10 @@ function toScreenPosition(vector, camera) {
     game.sidelength = sidelength
     scene.add(game)
 
-    main.info.then(info => {
-      if (!info) return
+    var boardInfo = info => {
       info.pieces[0] = 'board'
       var models = info.pieces.map(name => loadMesh(name + '.gltf').catch(e => null))
-      Promise.all(models).then(data => {
+      return Promise.all(models).then(data => {
         for (let pieceI = 0; pieceI < data.length; pieceI++) {
           data[pieceI].name = info.pieces[pieceI]
           game.pieces.push([null,null,null,null,null,null,null,null,null])
@@ -305,7 +385,9 @@ function toScreenPosition(vector, camera) {
 
         updateBoard()
       })
-    })
+    }
+    main.info.then(boardInfo, e => null)
+    main.infoStack.push(boardInfo)
 
     camera.position.setY(500)
     camera.position.setZ(0)
@@ -339,8 +421,8 @@ function toScreenPosition(vector, camera) {
     statusboard.body.appendChild(playerList.label)
     statusboard.body.appendChild(document.createElement('hr'))
     statusboard.body.appendChild(playerList.loading)
-    main.info.then(info => {
-      if (!info) return hud.body.removeChild(statusboard.wrapper)
+
+    var playerListInfo = info => {
       playerList.hr.style.display = ''
       statusboard.body.removeChild(playerList.loading)
       createText('td', 'Name', playerList.header)
@@ -354,7 +436,9 @@ function toScreenPosition(vector, camera) {
         createText('td', player.piece, playerListing)
         playerList.body.appendChild(playerListing)
       })
-    })
+    }
+    main.info.then(playerListInfo, e => hud.body.removeChild(statusboard.wrapper))
+    main.infoStack.push(() => hud.body.appendChild(statusboard.wrapper), playerListInfo)
     statusboard.body.appendChild(playerList.body)
     statusboard.body.appendChild(playerList.hr)
 
@@ -362,13 +446,14 @@ function toScreenPosition(vector, camera) {
       body: document.createElement('div')
       ,games: createText('div', 'Games: '), draws: createText('div', 'Draws: ')
     }
-    main.info.then(info => {
-      if (!info) return
+    ,infoboxInfo = info => {
       infobox.body.appendChild(infobox.games)
       infobox.body.appendChild(infobox.draws)
       infobox.games.appendChild(document.createTextNode(info.games))
       infobox.draws.appendChild(document.createTextNode(info.draws))
-    })
+    }
+    main.info.then(infoboxInfo, e => null)
+    main.infoStack.push(infoboxInfo)
     statusboard.body.appendChild(infobox.body)
 
     var bottombox = {
@@ -384,14 +469,15 @@ function toScreenPosition(vector, camera) {
     bottombox.chat.type = 'button'
     bottombox.settings.style.float = 'right'
     bottombox.settings.type = 'button'
-    main.info.then(info => {
-      if (!info) return
+    var bottomboxInfo = info => {
       bottombox.body.appendChild(bottombox.viewers)
       bottombox.body.appendChild(document.createElement('hr'))
       bottombox.body.appendChild(bottombox.chat)
       bottombox.body.appendChild(bottombox.settings)
       bottombox.viewers.appendChild(document.createTextNode(info.viewers.length))
-    })
+    }
+    main.info.then(bottomboxInfo, e => null)
+    main.infoStack.push(bottomboxInfo)
     statusboard.body.appendChild(bottombox.body)
 
     main.sizing.push({set size(v) {
@@ -404,13 +490,14 @@ function toScreenPosition(vector, camera) {
       hud.body.style.width = v.x + 'px'
       hud.body.style.height = v.y + 'px'
 
-      main.info.then(info => {
-        if (!info) return
+      var statusboardInfo = info => {
         statusboard.wrapper.style.height = 'auto'
         var compHeight = parseFloat(getComputedStyle(statusboard.wrapper).height)
         if (compHeight) h = Math.min(compHeight, v.y)
         statusboard.wrapper.style.height = h+1 + 'px'
-      })
+      }
+      main.info.then(statusboardInfo, e => null)
+      main.infoStack.push(statusboardInfo)
       Object.assign(statusboard.wrapper.style, {
         width: w + 'px'
       })
@@ -550,18 +637,10 @@ function toScreenPosition(vector, camera) {
     main.boardRaycaster.setFromCamera(new THREE.Vector2(originX*1.956, 0), camera)
     var plane = new THREE.Plane(new THREE.Vector3(0,1,0), 0)
     ,test = main.boardRaycaster.ray.intersectPlane(plane, new THREE.Vector3())
-
-    // if (originX > -.5 && screenMargin > statusboard.open+5) {
-    //   scene.position.setX(test.x/2)
-    // }
-    // else {
-    //   scene.position.setX(0)
-    // }
   }})
 
-  function run(a) {
-    renderer.render(scene, camera)
-    requestAnimationFrame(run)
-  }
-  run()
+  ;(function loop(a) {
+      renderer.render(scene, camera)
+      if (!main.exit) requestAnimationFrame(loop)
+    })()
 })()

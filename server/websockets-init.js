@@ -15,24 +15,21 @@ ws.on('connection', (socket, req) => {
 
     var req = {event}
     if (data) req.data = data
+    req = JSON.stringify(req)
 
-    if (this.readyState === 1) this._send(JSON.stringify(req))
+    if (this.readyState === 1) this._send(req)
+    else console.log('WS wasn\'t ready')
   }
 
   socket._on('message', req => {
     try {
-      if (req === 'ping') return socket._send(`pong`)
+      if (req === 'ping') return socket._send('pong')
       req = JSON.parse(req)
     } catch (e) {return}
     var promise = Promise.resolve()
     if (!socket.events[req.event]) {
       promise = promise.then(() => new Promise((resolve, reject) => setTimeout(() => {
-        if (!socket.events[req.event]) {
-          socket.send(`callback-${req.event}`,
-            {event: req.event, data: 'Invalid event.'}
-          )
-          return reject()
-        }
+        if (!socket.events[req.event]) return reject()
         else return resolve()
       }, 1000)))
     }
@@ -47,7 +44,7 @@ ws.on('connection', (socket, req) => {
       }) : () => {}
       socket.events[req.event](req.data, callback)
       socket.session.save().catch(e => e)
-    }, e => e)
+    })
     .catch(e => e)
   })
 
@@ -59,32 +56,20 @@ ws.on('connection', (socket, req) => {
 
   try {
     socket.cookies = cookie.parse(req.headers.cookie)
-    socket.sessionID = socket.cookies[process.env.COOKIE_NAME + '.sid'].slice(2).split('.')[0]
+    socket.sessionID = socket.cookies[process.env.COOKIE_NAME].slice(2).split('.')[0]
   } catch (e) {}
   socket.session = null
 
-  var promise = Promise.resolve()
-  if (socket.sessionID) {
-    promise = promise.then(() => {
-      return new Promise((resolve, reject) => {
-        redisClient.get(socket.sessionID, (err, session) => {
-          if (err) return reject(err)
-          if (session) resolve(session)
-          else reject('No session')
-        })
-      })
-      .then(session => {
-        session.save = () => new Promise((resolve, reject) => {
-          redisClient.set(socket.sessionID, session, err => {
-            if (err) reject(err)
-            resolve()
-          })
-        })
-        socket.session = session
-      })
+  var sID = socket.sessionID
+  if (sID) {
+    let save = (newSession, cb) => redisClient.set(sID, newSession, cb ? cb : e => e)
+    socket.getSession = cb => redisClient.get(sID, (err, session) => {
+      if (typeof cb === 'function') cb(err, session || null, session ? save : undefined)
     })
+  } else {
+    socket.getSession = cb => cb('No session', null)
   }
-  promise.then(() => ws.emit('ready', socket, req)).catch(console.log)
+  ws.emit('ready', socket, req)
 })
 
 module.exports = ws

@@ -32,11 +32,9 @@ WebSocket.prototype.emit = function (event, data, callback) {
 };
 
 WebSocket.prototype.on = function (setEvent, callback) {
-  if (typeof setEvent !== 'string') return {on: () => {throw new Error('Invalid event name')}}
-  if (typeof callback !== 'function') return this
-  if (!this.events) {
-    return {on: () => {console.error('Unable to create event'); return this}}
-  }
+  if (typeof setEvent !== 'string') throw new Error('Invalid event name')
+  if (typeof callback !== 'function') throw new Error('Invalid callback function')
+  if (!this.events) this.events = {}
 
   if (Object.keys(this.events).indexOf(setEvent) === -1) this.events[setEvent] = callback
 
@@ -57,16 +55,14 @@ ws.onopen = function onopen() {
     })
   }
   ws.onclose = () => {
+    ws.available = false
     var interval = setInterval(() => {
       if (ws.readyState === 0) return
       if (ws.readyState === 1) return clearInterval(interval)
 
-      let oldWs_events = ws.events
-      let oldWs_stacks = ws.stacks
-      ws = new WebSocket(address)
-      Object.assign(ws, {
-        events: oldWs_events, stacks: oldWs_stacks, onopen
-      })
+      let oldEvents = ws.events
+      let oldStacks = ws.stacks
+      ws = Object.assign(new WebSocket(address),{events: oldEvents, stacks: oldStacks, onopen})
     }, 50)
   }
   new Promise(resolve => {
@@ -77,5 +73,4 @@ ws.onopen = function onopen() {
     }, 50)
   })
 }
-ws.onerror = function onerror() {
-}
+ws.onerror = function onerror(err) {}

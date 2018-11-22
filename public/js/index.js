@@ -199,7 +199,7 @@ function toScreenPosition(vector, camera) {
   main.info = new Promise((resolve, reject) => ws.emit('init', null, res => {
     console.log(0, res)
     if ('error' in res) return reject(res)
-    if ('session' in res) {
+    if ('token' in res) {
       main.game.material.color = [0.2,0.2,0.2]
       let w = 250, h = 150, modal = {
         body: document.createElement('div')
@@ -265,26 +265,23 @@ function toScreenPosition(vector, camera) {
           req.onreadystatechange = function() {
             if (this.readyState === 4) {
               form.submit.disabled = false
-              ws.close() // automatically reconnects
-              ws.emit('session', {name: form.name_box.value}, res => {
-                main.info = new Promise((resolve, reject) => ws.emit('init', null, res => {
-                  console.log(res)
-                  if ('error' in res) return reject(res)
-                  if ('session' in res) {
-                    form.submit.disabled = false
-                    return reject()
-                  }
-                  main.game.material.color = [0xdd/255,0xdd/255,0xdd/255]
-                  main.sizing.remove(modal.sizing)
-                  main.hud.body.removeChild(modal.body)
-                  main.infoStack.map(act => {main.info.then(act, e => e)})
-                  resolve(res)
-                }))
-                main.info.catch(e => null)
-              })
+              ws.close() // refresh cookies, automatically reconnects
+              main.info = new Promise((resolve, reject) => ws.emit('init', null, res => {
+                console.log(1, res)
+                if ('error' in res) return reject(res)
+                if ('token' in res) {
+                  form.submit.disabled = false
+                  return reject()
+                }
+                main.game.material.color = [0xdd/255,0xdd/255,0xdd/255]
+                main.sizing.remove(modal.sizing)
+                main.hud.body.removeChild(modal.body)
+                main.infoStack.map(act => {main.info.then(act, e => e)})
+                resolve(res)
+              })).catch(e => null)
             }
           }
-          req.open('GET', `/session`, true)
+          req.open('GET', `/token?name=${form.name_box.value}`, true)
           req.send()
         })
         form.appendChild(form.message)

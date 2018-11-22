@@ -9,10 +9,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "connect-redis": "^3.4.0",
     "express": "^4.16.3",
-    "express-session": "^1.15.6",
     "hbs": "^4.0.1",
+    "jsonwebtoken": "^8.4.0",
     "mongoose": "^5.3.12",
     "ws": "^6.1.2"
   }

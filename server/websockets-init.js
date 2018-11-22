@@ -1,8 +1,8 @@
 const WebSocket = require('ws')
 const cookie = require('cookie')
+const jwt = require('jsonwebtoken')
 
 const {httpServer} = require('./app')
-const {redisClient} = require('./middleware/session')
 
 var ws = new WebSocket.Server({server: httpServer})
 
@@ -43,9 +43,7 @@ ws.on('connection', (socket, req) => {
         done = true
       }) : () => {}
       socket.events[req.event](req.data, callback)
-      socket.session.save().catch(e => e)
-    })
-    .catch(e => e)
+    }).catch(e => e)
   })
 
   socket.on = function (event, callback) {
@@ -54,22 +52,22 @@ ws.on('connection', (socket, req) => {
     socket.events[event] = callback
   }
 
-  try {
+  var promise = Promise.resolve()
+  if (req.headers.cookie) {
     socket.cookies = cookie.parse(req.headers.cookie)
-    socket.sessionID = socket.cookies[process.env.COOKIE_NAME].slice(2).split('.')[0]
-  } catch (e) {}
-  socket.session = null
-
-  var sID = socket.sessionID
-  if (sID) {
-    let save = (newSession, cb) => redisClient.set(sID, newSession, cb ? cb : e => e)
-    socket.getSession = cb => redisClient.get(sID, (err, session) => {
-      if (typeof cb === 'function') cb(err, session || null, session ? save : undefined)
-    })
-  } else {
-    socket.getSession = cb => cb('No session', null)
+    let token = socket.cookies[process.env.COOKIE_NAME]
+    promise = promise.then(() => new Promise((resolve, reject) => {
+      jwt.verify(token, process.env.JWT_SECRET, (err, res) => {
+        if (err) return reject(err)
+        if (res) {
+          delete res.iat; delete res.exp
+          resolve(socket.token = res)
+        }
+        else return resolve(socket.token = null)
+      })
+    }))
   }
-  ws.emit('ready', socket, req)
+  promise = promise.catch(e => e).then(() => ws.emit('ready', socket, req))
 })
 
 module.exports = ws

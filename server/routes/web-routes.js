@@ -1,36 +1,69 @@
+const cookie = require('cookie')
 const jwt = require('jsonwebtoken')
+const hbs = require('hbs')
 
-const {app} = require('./../app')
+const {app, router} = require('./../app')
+const formidable = require('./../middleware/formidable')
+const token = require('./../middleware/token')
+const Game = require('./../db/models/game')
 
-app.get('/', (req, res) => {
+var ss = s => new hbs.SafeString(s)
+
+router.get('/', (req, res) => {
   res.render('index', {
-    title: 'Home Page'
+    title: 'NoughtAxys - Home', token: req.token
   })
 })
 
-app.get('/token', (req, res) => {
-  // Creates a new token
-  var promise = Promise.resolve('')
-  if (req.query.name) {
-    promise = promise.then(() => new Promise((resolve, reject) => {
-      var payload = {name: req.query.name.trim()}, opts = {expiresIn: '7d'}
-      jwt.sign(payload, process.env.JWT_SECRET, opts, (err, token) => {
-        if (err) return reject(err)
-        resolve(token)
-      })
-    })).catch(e => '')
-  }
-  promise = promise.then(cookie => {
-    res.cookie(process.env.COOKIE_NAME, cookie, {
-      maxAge: 1000 * 60 * 60 * 24 * 7, secure: process.env.COOKIE_SECURE === 'true',
-      httpOnly: true
-    })
-    res.send()
+router.get('/games', (req, res) => {
+  if (req.query.id) return res.redirect(`/game?id=${req.query.id}`)
+  var opt = {title: 'NoughtAxys - Games'}
+
+  Game.find({}, (err, docs) => {
+    res.render('games', opt)
   })
-//   req.session.ref = 'noughtaxys'
-//   req.session.save(() => {
-//     res.send()
-//   })
-//   // Cannot make changes to a pre-existing session. They will be reverted upon the GET
-//   // request ending.
+})
+
+router.get('/viewer', (req, res) => {
+  res.render('viewer')
+})
+
+router.post('/newgame', (req, res) => {
+  if (!req.token.name) return res.status(400).redirect('/?name=required')
+
+  var game = new Game({creator: req.token.id})
+  return game.save((err, doc) => {
+    if (err) {
+      console.error(err)
+      return res.status(500).json({error: 'Server Error'})
+    }
+    return res.redirect(`/game?id=${game._id}`)
+  })
+})
+
+router.get('/game', (req, res) => {
+  console.log(req.token)
+  if (!req.query.id) return res.redirect('/games')
+  return Game.findById(req.query.id, (err, doc) => {
+    if (err || !doc) return res.redirect('/')
+    else return res.render('game', {
+      title: `Game Title`, bodyStyle: 'background-color: #000;', id: req.query.id
+    })
+  })
+})
+
+router.get('/setToken', (req, res) => {
+  console.log(req.query)
+  var promise = Promise.resolve(), queries = {
+    name: name => {
+      promise = promise.then(() => token.set(req.token, {name: name.trim()}).then(newToken => {
+        res.cookie(process.env.COOKIE_NAME, newToken, token.cookie)
+      }))
+    }
+  }
+
+  Object.keys(req.query).map(key => {
+    if (typeof queries[key] === 'function') queries[key](req.query[key])
+  })
+  return promise.then(() => res.redirect('back'))
 })

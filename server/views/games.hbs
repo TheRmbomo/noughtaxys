@@ -1,0 +1,102 @@
+<div style="margin: 5px;">
+  <a href="{{root}}/"><button>Back</button></a>
+</div>
+<div id="loading" style="text-align: center;">Loading...</div>
+<script src="js/alias.js"></script>
+<script>
+;(() => {
+  var main = {}
+
+  function createText(tag, text, parent) {
+    var node = document.createElement(tag), textNode = document.createTextNode(text)
+    node.classList.add('noselect')
+    node.appendChild(textNode)
+    if (parent) parent.appendChild(node)
+    return node
+  }
+
+  ws.emit('games', null, res => {
+    document.body.removeChild(document.getElementById('loading'))
+    if (!res.games) {
+      var div = document.createElement('div')
+      div.style.textAlign = 'center'
+      div.appendChild(createText('p', 'No games currently running.'))
+      div.appendChild(createText('button', 'Start a New Game?'))
+      document.body.appendChild(div)
+      return
+    }
+
+    var table = Object.assign(document.createElement('table'), {
+      wrapper: document.createElement('div')
+    })
+    table.wrapper.style.padding = '1em'
+    table.style.textAlign = 'left'
+
+    var titleRow = Object.assign(document.createElement('tr'), {
+      name: createText('td', 'Name'), players: createText('td', 'Players')
+    })
+    titleRow.appendChild(titleRow.name)
+    titleRow.appendChild(titleRow.players)
+    table.appendChild(titleRow)
+    res.games.map(game => {
+      game = mainJSON.convert('game', game)
+      console.log(game)
+      var row =  Object.assign(document.createElement('tr'), {
+        name: createText('td', game.name || 'Game ' + game._id)
+        ,players: createText(
+          'td', game.players.map(p => p.name).join(', ') +
+          (game.viewers ? ` (${game.viewers.length} viewers)` : '')
+        )
+      })
+      row.id = game._id
+      row.style.borderRadius = ''
+      row.appendChild(row.name)
+      row.appendChild(row.players)
+      table.appendChild(row)
+    })
+
+    function rowEvent(cb) {return event => {
+      var row = null
+      if (event.path[1].tagName === 'TR' && event.path[1].id) row = event.path[1]
+      if (row) cb(row)
+    }}
+    function eventListeners(element, events) {
+      Object.keys(events).map(event => {
+        if (typeof events[event] === 'function') element.addEventListener(event, events[event])
+        else if (Array.isArray(events[event])) {
+          element.addEventListener(event, events[event][0], events[event][1])
+        }
+      })
+    }
+
+    document.body.addEventListener('touchstart', event => {
+      var touch = event.touches[0], test = document.elementFromPoint(touch.clientX, touch.clientY)
+      rowEvent(row => {
+        main.targetRow = row
+        row.style.backgroundColor = '#446'
+        row.style.color = '#FFF'
+      })({path: [test, test.parentNode]})
+    })
+    document.body.addEventListener('touchend', event => {
+      if (main.targetRow) {
+        main.targetRow.style.backgroundColor = main.targetRow.style.color = ''
+        location.href = '/game?id=' + main.targetRow.id
+      }
+    })
+
+    eventListeners(table, {
+      mouseover: rowEvent(row => {
+        row.style.backgroundColor = '#446'; row.style.color = '#FFF'
+      })
+      ,mousedown: rowEvent(row => row.style.backgroundColor = '#668')
+      ,mouseup: rowEvent(row => {
+        row.style.backgroundColor = '#446'; location.href = '/game?id=' + row.id
+      })
+      ,mouseout: rowEvent(row => row.style.backgroundColor = row.style.color = '')
+    })
+
+    table.wrapper.appendChild(table)
+    document.body.appendChild(table.wrapper)
+  })
+})()
+</script>

@@ -1,5 +1,3 @@
-var address = 'ws://192.168.1.223:3001'
-
 WebSocket.prototype.emit = function (event, data, callback) {
   if (typeof event !== 'string') return
   else if (typeof data === 'function') {
@@ -41,7 +39,7 @@ WebSocket.prototype.on = function (setEvent, callback) {
   return this
 }
 
-var ws = Object.assign(new WebSocket(address), {events: {}, stacks: {}})
+var ws = Object.assign(new WebSocket(ws_address), {events: {}, stacks: {}})
 
 ws.onopen = function onopen() {
   ws.onmessage = eventObj => {
@@ -62,7 +60,9 @@ ws.onopen = function onopen() {
 
       let oldEvents = ws.events
       let oldStacks = ws.stacks
-      ws = Object.assign(new WebSocket(address),{events: oldEvents, stacks: oldStacks, onopen})
+      ws = Object.assign(
+        new WebSocket(ws_address), {events: oldEvents, stacks: oldStacks, onopen}
+      )
     }, 50)
   }
   new Promise(resolve => {

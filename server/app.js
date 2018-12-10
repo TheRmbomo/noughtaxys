@@ -8,25 +8,32 @@ const http = require('http')
 const express = require('express')
 // --
 
+// Local Libraries
+const token = require('./middleware/token')
+// --
+
 // Local Constants
 const public = path.join(__dirname + '/../public')
-const httpPort = 3001
+const httpPort = process.env.PORT
 // --
 
 // App Initialization
 var app = express()
 .set('views', path.join(__dirname + '/views'))
-.use(express.static(public))
 
 Object.assign(app.locals, {
   title_suffix: '',
-  title: '',
-  project_dir: path.join(__dirname, '..'),
-  public_dir: public
+  title: ''
 })
 
 var httpServer = http.createServer(app)
-module.exports = {app, httpServer}
+
+var router = express.Router()
+.use(express.static(public))
+.use(token.get)
+app.use(process.env.ROOT_ROUTE, router)
+
+module.exports = {app, router, httpServer}
 // --
 
 // Databases
@@ -43,11 +50,11 @@ require('./routes/web-routes')
 // --
 
 // Default Routes
-app.get('/not-found', (req, res) => {
+router.get('/not-found', (req, res) => {
   res.send('Resource not found.')
 })
 
-app.all('*', (req, res) => {
+router.all('*', (req, res) => {
   res.redirect('/not-found')
 })
 // --

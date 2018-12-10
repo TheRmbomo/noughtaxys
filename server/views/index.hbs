@@ -1,1 +1,51 @@
-<script src="js/index.js"></script>
+<div style="text-align: center;">
+  <h1>Ultimate Tic Tac Toe</h1>
+  <br>
+  Current Games: <span id="current"></span>
+  <br><br>
+  <a href="games"><button>List of Current Games</button></a>
+  <hr>
+  <form action="setToken" method="get">
+    <span>Username:</span>
+    <input id="username" style="text-align: center;" type="text" name="name" placeholder="Username" value="{{token.name}}">
+  </form>
+  <br>
+  <form id="newgame" action="newgame" method="post">
+    <button type="submit">Start New Game</button>
+  </form>
+</div>
+
+<script>
+;(() => {
+  function query(name) {
+    return window.URLSearchParams ? new URLSearchParams(location.search).get(name)
+    : (() => {
+      var query = location.search.replace('?','').split('&')
+      for (var i = query.length-1; i >= 0; i--) {
+        query[i] = query[i].split('=')
+        if (query[i][0] === name) return query[i][1]
+      }
+    })()
+  }
+
+  var name = document.getElementById('username'), originalName = name.value
+
+  name.addEventListener('change', event => {
+    if (name.value !== originalName) name.style.backgroundColor = '#DDD'
+    else name.style.backgroundColor = ''
+  })
+
+  var hasName = query('name')
+  if (hasName === 'required') {
+    name.style.backgroundColor = '#FDD'
+  } else if (!originalName && hasName) name.value = hasName
+
+  function refreshInfo() {
+    ws.emit('home', null, res => {
+      document.getElementById('current').innerText = res.currentGames
+    })
+  }
+  refreshInfo()
+  setInterval(refreshInfo, 5000)
+})()
+</script>

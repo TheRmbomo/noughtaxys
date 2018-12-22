@@ -3,31 +3,18 @@
   <br>
   Current Games: <span id="current"></span>
   <br><br>
-  <a href="games"><button>List of Current Games</button></a>
+  <a href="games"><button style="color: #000">List of Current Games</button></a>
   <hr>
   <form action="setToken" method="get">
     <span>Username:</span>
     <input id="username" style="text-align: center;" type="text" name="name" placeholder="Username" value="{{token.name}}">
   </form>
   <br>
-  <form id="newgame" action="newgame" method="post">
-    <button type="submit">Start New Game</button>
-  </form>
+  <a href="game"><button style="color: #000">Enter Game Menu</button></a>
 </div>
-
+<script src="js/utilities.js"></script>
 <script>
 ;(() => {
-  function query(name) {
-    return window.URLSearchParams ? new URLSearchParams(location.search).get(name)
-    : (() => {
-      var query = location.search.replace('?','').split('&')
-      for (var i = query.length-1; i >= 0; i--) {
-        query[i] = query[i].split('=')
-        if (query[i][0] === name) return query[i][1]
-      }
-    })()
-  }
-
   var name = document.getElementById('username'), originalName = name.value
 
   name.addEventListener('change', event => {
@@ -41,7 +28,7 @@
   } else if (!originalName && hasName) name.value = hasName
 
   function refreshInfo() {
-    ws.emit('home', null, res => {
+    ws.emit('home', res => {
       document.getElementById('current').innerText = res.currentGames
     })
   }

@@ -1,20 +1,27 @@
-Node.prototype.addChildren = function(...args) {
-  for (var i = 0; i < args.length; i++) {
-    if (i > 0 && typeof args[i] === 'string') this[args[i]] = args[i-1]
-    else this.appendChild(args[i])
+Object.assign(Node.prototype, {
+  addChildren: function(...args) {
+    for (var i = 0; i < args.length; i++) {
+      if (i > 0 && typeof args[i] === 'string') {
+        this[args[i]] = args[i-1]
+        if (args[i-1].setAttributes) args[i-1].setAttributes('ischild', args[i])
+      }
+      else this.appendChild(args[i])
+    }
+    return this
   }
-  return this
-}
-
-Node.prototype.makeChildOf = function(parent, name) {
-  parent.appendChild(this)
-  if (name) parent[name] = this
-  return this
-}
-Node.prototype.makeKeyOf = function(parent, name) {
-  if (name) parent[name] = this
-  return this
-}
+  ,makeChildOf: function(parent, name) {
+    parent.appendChild(this)
+    if (name) {
+      if (this.setAttributes) this.setAttributes('ischild', name)
+      parent[name] = this
+    }
+    return this
+  }
+  ,detach: function() {
+    if (this.parentNode) this.parentNode.removeChild(this)
+    return this
+  }
+})
 
 Element.prototype._setAttribute = Element.prototype.setAttribute
 Object.assign(Element.prototype, {
@@ -37,7 +44,9 @@ HTMLElement.prototype.setStyle = function(obj) {
   return this
 }
 
-THREE.EffectComposer.prototype.addPasses = function(...args) {
-  for (var i = 0; i < args.length; i++) {this.addPass(args[i])}
-  return this
+if (window.THREE) {
+  THREE.EffectComposer.prototype.addPasses = function(...args) {
+    for (var i = 0; i < args.length; i++) {this.addPass(args[i])}
+    return this
+  }
 }

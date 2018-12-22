@@ -23,15 +23,20 @@ ws.on('connection', (socket, req) => {
     try {
       if (req === 'ping') return socket._send('pong')
       req = JSON.parse(req)
+      var newargs = [req.event]
+      if ('data' in req) newargs.push(req.data)
     } catch (e) {return}
 
-    var done = false, callback = (req.callback !== undefined) ? (function (...args) {
-      if (done) return console.error('Callback already sent')
-      socket.send(`callback-${req.event}`, {event: req.event, args})
-      done = true
-    }) : () => {}
+    if (req.callback !== undefined) {
+      let done = false
+      newargs.push(function (...args) {
+        if (done) return console.error('Callback already sent')
+        socket.send(`callback-${req.event}`, {event: req.event, args})
+        done = true
+      })
+    } else newargs.push(function() {console.warn('No callback')})
 
-    socket.emit(req.event, req.data, callback)
+    socket.emit(...newargs)
   })
 
   var promise = Promise.resolve()

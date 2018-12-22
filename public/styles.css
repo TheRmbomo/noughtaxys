@@ -53,11 +53,16 @@ tr td:last-child {
   border-bottom-right-radius: 5px;
 }
 
+a {
+  color: unset;
+}
+
 button {
   font-size: unset;
   background: #EEE;
   border: unset;
   border-radius: 5px;
+  color: unset;
 }
 
 input {
@@ -97,20 +102,8 @@ li {
 .hud {
   position: absolute;
   top: 0;
-  background-color: #FFF;
   text-align: center;
   -webkit-overflow-scrolling: touch;
-}
-
-.hudtext {
-  color: #BBB;
-  font-size: 15px;
-}
-
-.scrollContent {
-  overflow: auto;
-  max-height: fit-content;
-  max-height: -moz-fit-content;
 }
 
 .piece {
@@ -120,8 +113,8 @@ li {
   margin: 0.25em;
 }
 
-.alignimg {
-  display: inline-block;
-  height: 100%;
-  vertical-align: middle;
+.menuButton {
+  background-color: #669;
+  width: 80%;
+  margin-top: 0.5em; padding: 0.5em;
 }

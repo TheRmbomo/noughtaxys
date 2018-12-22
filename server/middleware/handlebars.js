@@ -10,6 +10,7 @@ router.use((req, res, next) => {
     if (!options) options = {}
     file = file.replace('.hbs','')
     res._render('../template.hbs', Object.assign(options, {
+      title_suffix:' - NoughtAxys',
       partial: () => file, root: process.env.ROOT_ROUTE, ws: process.env.WS_URL,
       three: process.env.THREE_FILE
     }))

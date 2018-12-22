@@ -26,12 +26,10 @@ const Game = new Schema({
   ,d: {type: Number, default: 0, alias: 'draws'}
   ,cP: {type: Number, default: 0, alias: 'currentPlayer'}
   ,cB: {type: Number, default: -1, alias: 'currentBoard'}
-  ,s: {type: Number, default: 0, alias: 'state'}
+  ,s: {type: Number, default: 1, alias: 'state'}
   ,wr: {type: Number, alias: 'winner'}, w: {type: [Number], default: undefined, alias: 'win'}
-  ,vi: {type: Number, alias: 'visibility'}
+  ,vi: {type: Number, default: 1, alias: 'visibility'}
 })
-
-var deleteCheck = {}, gameCreatedCheck = {}
 
 Game.pre('save', function () {
   if (this.isNew) {
